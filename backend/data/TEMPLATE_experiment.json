@@ -1,0 +1,29 @@
+{
+  "_how_to_use": "Copy everything inside 'experiment' and paste it as a new item in the 'experiments' list in experiments.json. Give it a unique id (lowercase, no spaces) and number. Set 'verify' to null unless a reference function exists for this id in backend/tools.py (REFERENCE dictionary). Restart the server after editing.",
+  "experiment": {
+    "id": "my_experiment_id",
+    "number": 11,
+    "title": "Experiment title from your lab manual",
+    "topic": "Arithmetic | Arrays | String Operations | Interfacing | Code Conversion",
+    "keywords": ["words", "students", "might", "type"],
+    "aim": "To write an 8086 assembly language program to ...",
+    "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086"],
+    "theory": "Short theory paragraph.",
+    "algorithm": ["Start.", "Step 2", "Step 3", "Stop."],
+    "procedure": ["Step 1 of performing the experiment", "Step 2", "Step 3"],
+    "program": {
+      "assembler": "MASM / TASM / emu8086",
+      "code": ".MODEL SMALL\n.STACK 100h\n.DATA\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    ; your code\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+      "assumptions": ["Any assumptions about data or the simulator."]
+    },
+    "sample_input": "Input values",
+    "expected_output": "Expected output values",
+    "common_errors": ["A common mistake students make."],
+    "viva": {
+      "easy": [{"q": "Question?", "a": "Answer."}],
+      "medium": [{"q": "Question?", "a": "Answer."}],
+      "hard": [{"q": "Question?", "a": "Answer."}]
+    },
+    "verify": null
+  }
+}

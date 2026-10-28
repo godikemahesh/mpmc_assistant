@@ -1,0 +1,5 @@
+# Used by Vercel (it installs from the repository root). Keep in sync with backend/requirements.txt
+flask==3.0.3
+flask-cors==5.0.0
+pypdf==5.1.0
+python-dotenv==1.0.1

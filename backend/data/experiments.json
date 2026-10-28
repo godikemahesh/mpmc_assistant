@@ -1,0 +1,571 @@
+{
+  "assembler_note": "All programs use MASM/TASM syntax with simplified segment directives (.MODEL SMALL). They also assemble in emu8086. They are NOT written for DOSBox DEBUG, GNU as or kit monitor programs. Hex numbers end with 'h' and must start with a digit (write 0FFh, not FFh).",
+  "experiments": [
+    {
+      "id": "add16",
+      "number": 1,
+      "title": "Addition of Two 16-bit Numbers",
+      "topic": "Arithmetic",
+      "keywords": ["addition", "add", "sum", "carry", "16-bit", "adc"],
+      "aim": "To write an 8086 assembly language program to add two 16-bit numbers and store the sum and the carry.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "ADD destination, source adds the source to the destination and stores the result in the destination. If the result is larger than FFFFh, the Carry Flag (CF) is set to 1. JNC (jump if no carry) tests CF.",
+      "algorithm": [
+        "Start.",
+        "Initialise the data segment register (DS).",
+        "Load the first number into AX.",
+        "Add the second number to AX.",
+        "Store AX as the result.",
+        "If the carry flag is set, store 01h as carry; otherwise keep 00h.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Open MASM/TASM (inside DOSBox) or emu8086 and create a new file named ADD16.ASM.",
+        "Type the program exactly as given. Check that every hex number ends with 'h'.",
+        "Assemble: MASM ADD16.ASM; (or TASM ADD16.ASM) and fix any errors shown with line numbers.",
+        "Link: LINK ADD16.OBJ; (or TLINK ADD16.OBJ). In emu8086 just press Emulate.",
+        "Open the debugger (DEBUG/AFDEBUG/CodeView or the emu8086 window) and single-step the program.",
+        "After execution, view the variables RESULT and CARRY in the data segment.",
+        "Record the inputs and the observed outputs in your record book and compare with the expected result."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nNUM1    DW 1234h\nNUM2    DW 5678h\nRESULT  DW ?\nCARRY   DB 00h\n.CODE\nMAIN PROC\n    MOV AX, @DATA      ; initialise data segment\n    MOV DS, AX\n    MOV AX, NUM1       ; AX = first number\n    ADD AX, NUM2       ; AX = AX + second number\n    MOV RESULT, AX     ; store sum\n    JNC SKIP           ; no carry -> skip\n    MOV CARRY, 01h     ; carry occurred\nSKIP:\n    MOV AH, 4Ch        ; return to DOS\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Numbers are unsigned 16-bit values.", "INT 21h / AH=4Ch is used to exit; on a trainer kit replace it with HLT or the kit's return-to-monitor instruction."]
+      },
+      "sample_input": "NUM1 = 1234h, NUM2 = 5678h",
+      "expected_output": "RESULT = 68ACh, CARRY = 00h",
+      "common_errors": [
+        "Forgetting MOV AX,@DATA / MOV DS,AX, so variables are read from the wrong segment.",
+        "Reading RESULT bytes in reverse order: memory shows AC 68 because the 8086 is little-endian.",
+        "Writing FFFFh instead of 0FFFFh, which the assembler treats as a label name."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "What does the ADD instruction do?", "a": "It adds the source operand to the destination operand and stores the result in the destination."},
+          {"q": "Which flag shows a carry out of the most significant bit?", "a": "The Carry Flag (CF)."}
+        ],
+        "medium": [
+          {"q": "What is the difference between ADD and ADC?", "a": "ADC also adds the current value of the carry flag, so it is used for multi-word (e.g. 32-bit) addition."},
+          {"q": "Why do we load @DATA into AX first instead of directly into DS?", "a": "The 8086 does not allow an immediate value to be moved directly into a segment register, so a general register is used."}
+        ],
+        "hard": [
+          {"q": "How would you add two 32-bit numbers on the 8086?", "a": "Add the lower words with ADD, then add the upper words with ADC so the carry from the lower half is included."},
+          {"q": "Which flags are affected by ADD?", "a": "CF, PF, AF, ZF, SF and OF are all updated according to the result."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "num1", "label": "NUM1 (hex word)", "type": "word"}, {"name": "num2", "label": "NUM2 (hex word)", "type": "word"}],
+        "outputs": [{"name": "result", "label": "RESULT (hex word)", "type": "word"}, {"name": "carry", "label": "CARRY (0 or 1)", "type": "flag"}],
+        "sample": {"num1": "1234", "num2": "5678"}
+      }
+    },
+    {
+      "id": "sub16",
+      "number": 2,
+      "title": "Subtraction of Two 16-bit Numbers",
+      "topic": "Arithmetic",
+      "keywords": ["subtraction", "subtract", "difference", "borrow", "sub", "sbb"],
+      "aim": "To write an 8086 assembly language program to subtract two 16-bit numbers and store the difference and the borrow.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "SUB destination, source computes destination - source. If the source is larger than the destination (unsigned), a borrow occurs and CF is set to 1.",
+      "algorithm": [
+        "Start.",
+        "Initialise DS.",
+        "Load the first number (minuend) into AX.",
+        "Subtract the second number (subtrahend) from AX.",
+        "Store AX as the difference.",
+        "If the carry flag is set, store 01h as borrow.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Create a file SUB16.ASM in MASM/TASM or emu8086.",
+        "Type the program and check the operand order: SUB AX, NUM2 means AX - NUM2.",
+        "Assemble and link the program (or press Emulate in emu8086).",
+        "Single-step through the program in the debugger.",
+        "Observe RESULT and BORROW in memory.",
+        "Repeat with NUM1 smaller than NUM2 and observe the borrow flag.",
+        "Record the observations."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nNUM1    DW 5678h\nNUM2    DW 1234h\nRESULT  DW ?\nBORROW  DB 00h\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    MOV AX, NUM1       ; AX = minuend\n    SUB AX, NUM2       ; AX = AX - subtrahend\n    MOV RESULT, AX\n    JNC SKIP           ; CF = 0 -> no borrow\n    MOV BORROW, 01h\nSKIP:\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Unsigned 16-bit numbers.", "When a borrow occurs the result is the two's complement form (e.g. 1234h - 5678h = BBBCh)."]
+      },
+      "sample_input": "NUM1 = 5678h, NUM2 = 1234h",
+      "expected_output": "RESULT = 4444h, BORROW = 00h",
+      "common_errors": [
+        "Reversing the operands, which gives NUM2 - NUM1 instead of NUM1 - NUM2.",
+        "Expecting a negative number; the 8086 stores the two's complement and sets CF."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "What does SUB AX, BX do?", "a": "It computes AX - BX and stores the result in AX."},
+          {"q": "Which flag indicates a borrow?", "a": "The Carry Flag (CF) is set when a borrow occurs."}
+        ],
+        "medium": [
+          {"q": "What is SBB used for?", "a": "Subtract with borrow: it subtracts the source and the carry flag, used for multi-word subtraction."},
+          {"q": "What is the difference between SUB and CMP?", "a": "CMP performs the same subtraction to set flags but does not store the result."}
+        ],
+        "hard": [
+          {"q": "How does the processor represent 1234h - 5678h?", "a": "As the two's complement BBBCh with CF = 1 indicating a borrow."},
+          {"q": "When is the Overflow Flag set in subtraction?", "a": "When the signed result is outside the range -32768 to +32767, e.g. subtracting a negative number from a large positive number."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "num1", "label": "NUM1 (hex word)", "type": "word"}, {"name": "num2", "label": "NUM2 (hex word)", "type": "word"}],
+        "outputs": [{"name": "result", "label": "RESULT (hex word)", "type": "word"}, {"name": "borrow", "label": "BORROW (0 or 1)", "type": "flag"}],
+        "sample": {"num1": "5678", "num2": "1234"}
+      }
+    },
+    {
+      "id": "mul16",
+      "number": 3,
+      "title": "Multiplication of Two 16-bit Numbers",
+      "topic": "Arithmetic",
+      "keywords": ["multiplication", "multiply", "product", "mul", "imul"],
+      "aim": "To write an 8086 assembly language program to multiply two unsigned 16-bit numbers.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "MUL source multiplies AX by a 16-bit source. The 32-bit product is stored in DX:AX (DX = upper word, AX = lower word). For an 8-bit source, AL is multiplied and the product is stored in AX. MUL cannot take an immediate operand.",
+      "algorithm": [
+        "Start.",
+        "Initialise DS.",
+        "Load the first number into AX.",
+        "Load the second number into BX.",
+        "Execute MUL BX; the product is in DX:AX.",
+        "Store AX as the lower word and DX as the upper word.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Create MUL16.ASM and type the program.",
+        "Assemble and link (or emulate in emu8086).",
+        "Single-step and watch DX and AX after MUL BX.",
+        "Note both DX (upper word) and AX (lower word) — the product is 32 bits.",
+        "Record the result."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nNUM1    DW 1234h\nNUM2    DW 5678h\nPRODL   DW ?          ; lower word of product\nPRODH   DW ?          ; upper word of product\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    MOV AX, NUM1\n    MOV BX, NUM2\n    MUL BX             ; DX:AX = AX * BX\n    MOV PRODL, AX\n    MOV PRODH, DX\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Unsigned multiplication (MUL). Use IMUL for signed numbers."]
+      },
+      "sample_input": "NUM1 = 1234h, NUM2 = 5678h",
+      "expected_output": "DX = 0626h, AX = 0060h (product = 06260060h)",
+      "common_errors": [
+        "Writing MUL 5678h — MUL cannot use an immediate operand.",
+        "Checking only AX and missing the upper word in DX.",
+        "Using IMUL for unsigned numbers (gives different results for values above 7FFFh)."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "Where is the result of a 16-bit MUL stored?", "a": "In DX:AX — DX holds the upper word and AX the lower word."},
+          {"q": "Can MUL take an immediate operand?", "a": "No. The operand must be a register or memory location."}
+        ],
+        "medium": [
+          {"q": "What is the difference between MUL and IMUL?", "a": "MUL treats operands as unsigned, IMUL as signed (two's complement)."},
+          {"q": "Where is the result of an 8-bit MUL stored?", "a": "AL is multiplied by the operand and the 16-bit product is stored in AX."}
+        ],
+        "hard": [
+          {"q": "When are CF and OF set after MUL?", "a": "They are set when the upper half of the product (DX or AH) is non-zero."},
+          {"q": "How can you multiply by 2 without MUL?", "a": "Use SHL (shift left) by 1, which is faster."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "num1", "label": "NUM1 (hex word)", "type": "word"}, {"name": "num2", "label": "NUM2 (hex word)", "type": "word"}],
+        "outputs": [{"name": "dx", "label": "DX / PRODH (hex word)", "type": "word"}, {"name": "ax", "label": "AX / PRODL (hex word)", "type": "word"}],
+        "sample": {"num1": "1234", "num2": "5678"}
+      }
+    },
+    {
+      "id": "div16",
+      "number": 4,
+      "title": "Division of a 16-bit Number by an 8-bit Number",
+      "topic": "Arithmetic",
+      "keywords": ["division", "divide", "quotient", "remainder", "div", "idiv"],
+      "aim": "To write an 8086 assembly language program to divide a 16-bit number by an 8-bit number.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "DIV source with an 8-bit source divides AX by the source. The quotient is stored in AL and the remainder in AH. If the divisor is 0 or the quotient is larger than FFh, a divide error (type 0 interrupt) occurs.",
+      "algorithm": [
+        "Start.",
+        "Initialise DS.",
+        "Load the 16-bit dividend into AX.",
+        "Load the 8-bit divisor into BL.",
+        "Execute DIV BL.",
+        "Store AL as the quotient and AH as the remainder.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Create DIV16.ASM and type the program.",
+        "Assemble and link (or emulate).",
+        "Single-step and observe AX before and after DIV BL.",
+        "Read the quotient from AL and remainder from AH.",
+        "Try a divisor of 00h and note the divide error (do not leave it in your final program)."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nDIVIDEND DW 0064h      ; 100 decimal\nDIVISOR  DB 07h\nQUOT     DB ?\nREMD     DB ?\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    MOV AX, DIVIDEND\n    MOV BL, DIVISOR\n    DIV BL             ; AL = quotient, AH = remainder\n    MOV QUOT, AL\n    MOV REMD, AH\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Unsigned division. The quotient must fit in 8 bits (dividend / divisor <= FFh)."]
+      },
+      "sample_input": "DIVIDEND = 0064h, DIVISOR = 07h",
+      "expected_output": "QUOT (AL) = 0Eh, REMD (AH) = 02h",
+      "common_errors": [
+        "Divide overflow error because the quotient is larger than FFh.",
+        "Divisor is 00h (divide by zero).",
+        "For 16-bit DIV (word divisor), forgetting to clear DX first, so DX:AX holds garbage."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "Where are the quotient and remainder after an 8-bit DIV?", "a": "Quotient in AL and remainder in AH."},
+          {"q": "What happens if you divide by zero?", "a": "The processor generates a divide error (type 0 interrupt)."}
+        ],
+        "medium": [
+          {"q": "For a 16-bit divisor, what is the dividend?", "a": "The 32-bit value in DX:AX; quotient goes to AX and remainder to DX."},
+          {"q": "Why should DX be cleared before a 16-bit DIV?", "a": "DX is the upper word of the dividend; leftover data in DX gives a wrong result or overflow."}
+        ],
+        "hard": [
+          {"q": "What is CBW / CWD used for?", "a": "They sign-extend AL into AX (CBW) or AX into DX:AX (CWD) before IDIV."},
+          {"q": "When does a divide overflow occur even if the divisor is not zero?", "a": "When the quotient does not fit in the destination (AL for 8-bit, AX for 16-bit division)."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "dividend", "label": "DIVIDEND (hex word)", "type": "word"}, {"name": "divisor", "label": "DIVISOR (hex byte)", "type": "byte"}],
+        "outputs": [{"name": "quotient", "label": "QUOT / AL (hex byte)", "type": "byte"}, {"name": "remainder", "label": "REMD / AH (hex byte)", "type": "byte"}],
+        "sample": {"dividend": "0064", "divisor": "07"}
+      }
+    },
+    {
+      "id": "largest",
+      "number": 5,
+      "title": "Largest Number in an Array",
+      "topic": "Arrays",
+      "keywords": ["largest", "maximum", "max", "biggest", "greatest", "array"],
+      "aim": "To write an 8086 assembly language program to find the largest number in an array of unsigned bytes.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "The first element is assumed to be the largest. Each remaining element is compared using CMP; if it is larger (unsigned, JAE / JB), it replaces the current largest. LOOP decrements CX and repeats until CX = 0.",
+      "algorithm": [
+        "Start and initialise DS.",
+        "Point SI to the array and load the count into CX.",
+        "Load the first element into AL and decrement CX.",
+        "Move SI to the next element and compare AL with it.",
+        "If AL is smaller, copy the element into AL.",
+        "Repeat until CX becomes 0.",
+        "Store AL as the largest number and terminate."
+      ],
+      "procedure": [
+        "Create LARGE.ASM and type the program.",
+        "Assemble and link (or emulate).",
+        "Single-step the loop and watch AL, SI and CX.",
+        "Observe LARGEST in memory after execution.",
+        "Change the array values and repeat."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nARR     DB 12h, 45h, 07h, 89h, 34h\nN       EQU 5\nLARGEST DB ?\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    LEA SI, ARR\n    MOV CX, N\n    MOV AL, [SI]       ; assume first is largest\n    DEC CX\nNEXT:\n    INC SI\n    CMP AL, [SI]\n    JAE SKIP           ; AL >= element (unsigned)\n    MOV AL, [SI]       ; new largest\nSKIP:\n    LOOP NEXT\n    MOV LARGEST, AL\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Elements are unsigned bytes. For signed numbers use JGE instead of JAE.", "Array has at least 2 elements."]
+      },
+      "sample_input": "ARR = 12h, 45h, 07h, 89h, 34h",
+      "expected_output": "LARGEST = 89h",
+      "common_errors": [
+        "Using signed jumps (JGE/JG) for unsigned data: 89h is treated as negative and is skipped.",
+        "Not decrementing CX after loading the first element, so the loop reads one byte past the array.",
+        "Using MOV SI, ARR instead of LEA SI, ARR (or MOV SI, OFFSET ARR): MOV tries to load the data, not the address, and MASM reports an operand size error."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "What does the LOOP instruction do?", "a": "It decrements CX and jumps to the label if CX is not zero."},
+          {"q": "What does LEA do?", "a": "Loads the effective address (offset) of a memory operand into a register."}
+        ],
+        "medium": [
+          {"q": "Difference between JA and JG?", "a": "JA is for unsigned comparison (CF and ZF), JG is for signed comparison (SF, OF, ZF)."},
+          {"q": "Why is CX decremented before the loop?", "a": "The first element is already loaded, so only N-1 comparisons are needed."}
+        ],
+        "hard": [
+          {"q": "How would you also store the position of the largest element?", "a": "Keep a counter or save SI (minus the array start) whenever AL is updated."},
+          {"q": "Which addressing mode is [SI]?", "a": "Register indirect addressing."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "array", "label": "Array (hex bytes, comma separated)", "type": "bytes"}],
+        "outputs": [{"name": "largest", "label": "LARGEST (hex byte)", "type": "byte"}],
+        "sample": {"array": "12, 45, 07, 89, 34"}
+      }
+    },
+    {
+      "id": "smallest",
+      "number": 6,
+      "title": "Smallest Number in an Array",
+      "topic": "Arrays",
+      "keywords": ["smallest", "minimum", "min", "least", "lowest", "array"],
+      "aim": "To write an 8086 assembly language program to find the smallest number in an array of unsigned bytes.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "Same as finding the largest, but the condition is reversed: if the current element is smaller (unsigned, JBE skips when AL is already smaller or equal), it becomes the new smallest.",
+      "algorithm": [
+        "Start and initialise DS.",
+        "Point SI to the array and load the count into CX.",
+        "Load the first element into AL and decrement CX.",
+        "Move SI to the next element and compare AL with it.",
+        "If AL is larger, copy the element into AL.",
+        "Repeat until CX becomes 0.",
+        "Store AL as the smallest number and terminate."
+      ],
+      "procedure": [
+        "Create SMALL.ASM and type the program.",
+        "Assemble and link (or emulate).",
+        "Single-step the loop and watch AL, SI and CX.",
+        "Observe SMALLEST in memory.",
+        "Change the array values and repeat."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nARR      DB 12h, 45h, 07h, 89h, 34h\nN        EQU 5\nSMALLEST DB ?\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    LEA SI, ARR\n    MOV CX, N\n    MOV AL, [SI]       ; assume first is smallest\n    DEC CX\nNEXT:\n    INC SI\n    CMP AL, [SI]\n    JBE SKIP           ; AL <= element (unsigned)\n    MOV AL, [SI]       ; new smallest\nSKIP:\n    LOOP NEXT\n    MOV SMALLEST, AL\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Elements are unsigned bytes. For signed numbers use JLE instead of JBE."]
+      },
+      "sample_input": "ARR = 12h, 45h, 07h, 89h, 34h",
+      "expected_output": "SMALLEST = 07h",
+      "common_errors": [
+        "Using signed jumps (JLE/JL) for unsigned data: values above 7Fh are treated as negative and wrongly chosen as smallest.",
+        "Using JAE (copied from the largest program), which finds the largest instead."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "What does CMP do?", "a": "It subtracts the source from the destination to set flags, without storing the result."},
+          {"q": "Which register is used as the loop counter?", "a": "CX."}
+        ],
+        "medium": [
+          {"q": "Difference between JB and JL?", "a": "JB is for unsigned (below), JL is for signed (less)."},
+          {"q": "What would change to find the smallest of 16-bit numbers?", "a": "Use DW for the array, AX instead of AL, and add 2 to SI each time."}
+        ],
+        "hard": [
+          {"q": "Can you find both largest and smallest in one pass?", "a": "Yes, keep two registers (e.g. AL and BL) and update both while looping."},
+          {"q": "Which flags does JBE check?", "a": "It jumps if CF = 1 or ZF = 1."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "array", "label": "Array (hex bytes, comma separated)", "type": "bytes"}],
+        "outputs": [{"name": "smallest", "label": "SMALLEST (hex byte)", "type": "byte"}],
+        "sample": {"array": "12, 45, 07, 89, 34"}
+      }
+    },
+    {
+      "id": "sort_asc",
+      "number": 7,
+      "title": "Sorting an Array in Ascending Order",
+      "topic": "Arrays",
+      "keywords": ["sort", "sorting", "ascending", "bubble", "order", "arrange", "descending"],
+      "aim": "To write an 8086 assembly language program to sort an array of unsigned bytes in ascending order using bubble sort.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "Bubble sort compares adjacent elements and swaps them if they are in the wrong order. After each pass the largest remaining element moves to the end. N-1 passes are needed for N elements. XCHG swaps a register with a memory location.",
+      "algorithm": [
+        "Start and initialise DS.",
+        "Load the pass counter DX with N-1.",
+        "For each pass, point SI to the array and load CX with the pass counter.",
+        "Compare [SI] with [SI+1]; if [SI] is larger, swap them.",
+        "Increment SI and repeat until CX = 0.",
+        "Decrement DX and repeat the pass until DX = 0.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Create SORT.ASM and type the program.",
+        "Assemble and link (or emulate).",
+        "Watch the array in memory after every pass.",
+        "After execution, note the sorted array.",
+        "For descending order, change JBE to JAE and repeat."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nARR DB 34h, 12h, 89h, 07h, 45h\nN   EQU 5\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    MOV DX, N-1        ; number of passes\nOUTER:\n    MOV CX, DX         ; comparisons in this pass\n    LEA SI, ARR\nINNER:\n    MOV AL, [SI]\n    CMP AL, [SI+1]\n    JBE NOSWAP         ; already in order (unsigned)\n    XCHG AL, [SI+1]    ; swap the two elements\n    MOV [SI], AL\nNOSWAP:\n    INC SI\n    LOOP INNER\n    DEC DX\n    JNZ OUTER\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Unsigned bytes. The sorted array overwrites ARR in place."]
+      },
+      "sample_input": "ARR = 34h, 12h, 89h, 07h, 45h",
+      "expected_output": "ARR = 07h, 12h, 34h, 45h, 89h",
+      "common_errors": [
+        "Using JAE instead of JBE, which sorts in descending order.",
+        "Using CX for both loops without saving it, causing an infinite loop or early exit.",
+        "Running N passes with N comparisons, which reads past the end of the array."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "What does XCHG do?", "a": "It exchanges the contents of two operands."},
+          {"q": "How many passes does bubble sort need for N elements?", "a": "N - 1 passes."}
+        ],
+        "medium": [
+          {"q": "How do you change the program to sort in descending order?", "a": "Change JBE to JAE so elements are swapped when the first is smaller."},
+          {"q": "Why is DX used as the outer counter?", "a": "CX is used by LOOP for the inner loop, so another register keeps the pass count."}
+        ],
+        "hard": [
+          {"q": "What is the time complexity of bubble sort?", "a": "O(N^2) comparisons in the worst case."},
+          {"q": "Can XCHG exchange two memory locations directly?", "a": "No, one operand must be a register."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "array", "label": "Array before sorting (hex bytes)", "type": "bytes"}],
+        "outputs": [{"name": "sorted", "label": "Array after sorting (hex bytes)", "type": "bytes"}],
+        "sample": {"array": "34, 12, 89, 07, 45"}
+      }
+    },
+    {
+      "id": "search",
+      "number": 8,
+      "title": "Searching for a Number in an Array (Linear Search)",
+      "topic": "Arrays",
+      "keywords": ["search", "searching", "find", "key", "linear", "element", "present"],
+      "aim": "To write an 8086 assembly language program to search for a given byte in an array and find its position.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "Each element is compared with the key using CMP. If ZF = 1 (equal) the key is found and its position is stored; if the loop ends without a match, the key is not present.",
+      "algorithm": [
+        "Start and initialise DS.",
+        "Point SI to the array, load N into CX and the key into AL.",
+        "Set the position counter BL to 1.",
+        "Compare AL with [SI]; if equal go to FOUND.",
+        "Otherwise increment SI and BL and loop until CX = 0.",
+        "If not found, store FOUND = 00h; else store FOUND = 01h and POS = BL.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Create SEARCH.ASM and type the program.",
+        "Assemble and link (or emulate).",
+        "Run with a key that is present and note FOUND and POS.",
+        "Change KEY to a value not in the array and run again.",
+        "Record both observations."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nARR   DB 12h, 45h, 07h, 89h, 34h\nN     EQU 5\nKEY   DB 89h\nFOUND DB 00h\nPOS   DB 00h\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    LEA SI, ARR\n    MOV CX, N\n    MOV AL, KEY\n    MOV BL, 01h        ; position (1-based)\nSRCH:\n    CMP AL, [SI]\n    JE  HIT\n    INC SI\n    INC BL\n    LOOP SRCH\n    MOV FOUND, 00h     ; key not present\n    JMP DONE\nHIT:\n    MOV FOUND, 01h\n    MOV POS, BL\nDONE:\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Position is counted from 1. If the key appears more than once, the first position is reported."]
+      },
+      "sample_input": "ARR = 12h, 45h, 07h, 89h, 34h, KEY = 89h",
+      "expected_output": "FOUND = 01h, POS = 04h",
+      "common_errors": [
+        "Counting position from 0 instead of 1 (gives 03h instead of 04h).",
+        "Forgetting JMP DONE, so the not-found path falls through into HIT."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "Which flag is checked by JE?", "a": "The Zero Flag (ZF = 1 means equal)."},
+          {"q": "What is linear search?", "a": "Checking each element one by one until the key is found or the list ends."}
+        ],
+        "medium": [
+          {"q": "Which string instruction can be used for searching?", "a": "SCASB/SCASW with REPNE compares AL/AX with ES:[DI] repeatedly."},
+          {"q": "Why is JMP DONE needed?", "a": "To skip the FOUND code when the key is not present."}
+        ],
+        "hard": [
+          {"q": "How would you rewrite this using REPNE SCASB?", "a": "Set ES=DS, DI=array, CX=N, AL=key, CLD, then REPNE SCASB; if ZF=1 the key was found and position = N - CX."},
+          {"q": "What is the worst-case number of comparisons?", "a": "N comparisons, when the key is last or absent."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "array", "label": "Array (hex bytes)", "type": "bytes"}, {"name": "key", "label": "KEY (hex byte)", "type": "byte"}],
+        "outputs": [{"name": "found", "label": "FOUND (0 or 1)", "type": "flag"}, {"name": "position", "label": "POS (hex byte, 0 if not found)", "type": "byte"}],
+        "sample": {"array": "12, 45, 07, 89, 34", "key": "89"}
+      }
+    },
+    {
+      "id": "block_transfer",
+      "number": 9,
+      "title": "Block Data Transfer",
+      "topic": "String Operations",
+      "keywords": ["block", "transfer", "copy", "move", "movsb", "string", "rep"],
+      "aim": "To write an 8086 assembly language program to transfer a block of bytes from one memory area to another.",
+      "apparatus": ["PC with MASM/TASM + DOSBox, or emu8086", "8086 trainer kit (optional)"],
+      "theory": "MOVSB copies a byte from DS:[SI] to ES:[DI] and then increments (DF = 0) or decrements (DF = 1) SI and DI. REP repeats it CX times. CLD clears the direction flag so the copy goes forward.",
+      "algorithm": [
+        "Start and initialise DS and ES with the data segment.",
+        "Point SI to the source block and DI to the destination block.",
+        "Load the number of bytes into CX.",
+        "Clear the direction flag (CLD).",
+        "Execute REP MOVSB.",
+        "Terminate the program."
+      ],
+      "procedure": [
+        "Create BLOCK.ASM and type the program.",
+        "Assemble and link (or emulate).",
+        "Before running, view the DST area (all 00h).",
+        "Run the program and view DST again.",
+        "Record the source and destination contents."
+      ],
+      "program": {
+        "assembler": "MASM / TASM / emu8086",
+        "code": ".MODEL SMALL\n.STACK 100h\n.DATA\nSRC DB 11h, 22h, 33h, 44h, 55h\nDST DB 5 DUP(00h)\nN   EQU 5\n.CODE\nMAIN PROC\n    MOV AX, @DATA\n    MOV DS, AX\n    MOV ES, AX         ; MOVSB writes to ES:DI\n    LEA SI, SRC\n    LEA DI, DST\n    MOV CX, N\n    CLD                ; forward direction\n    REP MOVSB          ; copy CX bytes\n    MOV AH, 4Ch\n    INT 21h\nMAIN ENDP\nEND MAIN",
+        "assumptions": ["Source and destination do not overlap."]
+      },
+      "sample_input": "SRC = 11h, 22h, 33h, 44h, 55h",
+      "expected_output": "DST = 11h, 22h, 33h, 44h, 55h",
+      "common_errors": [
+        "Not loading ES, so the bytes are written to the wrong segment.",
+        "Missing CLD; if DF = 1 the copy runs backwards.",
+        "Forgetting to load CX, so REP repeats an unknown number of times."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "What does MOVSB do?", "a": "Copies one byte from DS:SI to ES:DI and updates SI and DI."},
+          {"q": "What does the REP prefix do?", "a": "Repeats the string instruction CX times, decrementing CX each time."}
+        ],
+        "medium": [
+          {"q": "What is the purpose of CLD?", "a": "Clears the direction flag so SI and DI are incremented (forward copy)."},
+          {"q": "Which segment registers are used by MOVSB?", "a": "DS for the source (SI) and ES for the destination (DI)."}
+        ],
+        "hard": [
+          {"q": "How do you copy overlapping blocks safely?", "a": "If the destination is above the source, copy backwards: set SI/DI to the last bytes and use STD."},
+          {"q": "Difference between MOVSB and MOVSW?", "a": "MOVSB moves bytes (SI/DI change by 1); MOVSW moves words (SI/DI change by 2)."}
+        ]
+      },
+      "verify": {
+        "inputs": [{"name": "array", "label": "Source block (hex bytes)", "type": "bytes"}],
+        "outputs": [{"name": "destination", "label": "Destination block (hex bytes)", "type": "bytes"}],
+        "sample": {"array": "11, 22, 33, 44, 55"}
+      }
+    },
+    {
+      "id": "ppi8255",
+      "number": 10,
+      "title": "Interfacing 8255 PPI – Output Data to Port A",
+      "topic": "Interfacing",
+      "keywords": ["8255", "ppi", "interfacing", "port", "led", "control word", "out", "io"],
+      "aim": "To interface the 8255 Programmable Peripheral Interface with the 8086 and send data to Port A in Mode 0.",
+      "apparatus": ["8086 trainer kit with on-board 8255", "LED interface board", "Power supply"],
+      "theory": "The 8255 has three 8-bit ports (A, B, C) and a control register. Control word 80h sets all ports as outputs in Mode 0 (simple I/O). Data is written using OUT. Because port addresses on kits are above FFh, the address is placed in DX and OUT DX, AL is used.",
+      "algorithm": [
+        "Start.",
+        "Load the control word 80h into AL.",
+        "Load the control register address into DX and execute OUT DX, AL.",
+        "Load the data byte (55h) into AL.",
+        "Load the Port A address into DX and execute OUT DX, AL.",
+        "Stop (HLT or return to monitor)."
+      ],
+      "procedure": [
+        "Find the 8255 port addresses in YOUR kit's manual — they differ between kit makers.",
+        "Replace the EQU values in the program with those addresses.",
+        "Connect the LED board to Port A of the 8255.",
+        "Enter the program using the kit's assembler or the hex codes from your manual.",
+        "Execute the program and observe the LEDs (55h = alternate LEDs ON).",
+        "Change the data byte and observe the new pattern."
+      ],
+      "program": {
+        "assembler": "MASM-style syntax for trainer kits",
+        "code": "; Port addresses below are EXAMPLES only - use your kit's addresses\nPORTA  EQU 0FFE0h\nCTRL   EQU 0FFE6h\n\n    MOV AL, 80h        ; all ports output, mode 0\n    MOV DX, CTRL\n    OUT DX, AL\n    MOV AL, 55h        ; data pattern 0101 0101\n    MOV DX, PORTA\n    OUT DX, AL\n    HLT",
+        "assumptions": ["Port addresses are kit-specific examples.", "Real hardware interfacing cannot be verified by this software; emu8086 can only simulate its own virtual devices, not an 8255 board."]
+      },
+      "sample_input": "Control word = 80h, data = 55h",
+      "expected_output": "LEDs on Port A show the pattern 0101 0101 (alternate LEDs ON)",
+      "common_errors": [
+        "Using the wrong port addresses for your kit.",
+        "Using OUT 0FFE6h, AL — direct port addresses are only allowed up to FFh; use DX.",
+        "Not writing the control word first, so the ports stay in input mode."
+      ],
+      "viva": {
+        "easy": [
+          {"q": "How many ports does the 8255 have?", "a": "Three 8-bit ports: Port A, Port B and Port C."},
+          {"q": "What does control word 80h mean?", "a": "I/O mode, all ports (A, B, C) configured as outputs in Mode 0."}
+        ],
+        "medium": [
+          {"q": "What are the operating modes of the 8255?", "a": "Mode 0 (simple I/O), Mode 1 (strobed I/O) and Mode 2 (bidirectional bus, Port A only), plus BSR mode for Port C bits."},
+          {"q": "When must DX be used with IN/OUT?", "a": "When the port address is greater than FFh."}
+        ],
+        "hard": [
+          {"q": "What is BSR mode?", "a": "Bit Set/Reset mode lets you set or clear individual bits of Port C using a control word with D7 = 0."},
+          {"q": "What is the difference between memory-mapped and I/O-mapped I/O?", "a": "I/O-mapped uses IN/OUT and a separate address space; memory-mapped uses normal memory instructions and shares memory addresses."}
+        ]
+      },
+      "verify": null
+    }
+  ]
+}

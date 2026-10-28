@@ -1,0 +1,17 @@
+# secrets
+.env
+*.env
+!.env.example
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+# uploads / os / editor
+uploads/
+*.pdf
+.DS_Store
+Thumbs.db
+.vscode/
+.vercel/

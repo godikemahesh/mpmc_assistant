@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPMC Lab Assistant</title>
+  <meta name="description" content="Agentic AI-based assistant for 8086 Microprocessors & Microcontrollers lab experiments">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button>
+    <a href="#/" class="brand"><span class="logo">⚡</span><span>MPMC Lab Assistant</span></a>
+    <span class="badge" id="modeBadge" title="AI mode">checking…</span>
+    <button class="icon-btn" id="activityBtn" aria-label="Show agent activity">🧠</button>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar">
+      <a href="#/" data-route="home">🏠 Home</a>
+      <a href="#/library" data-route="library">📚 Experiment Library</a>
+      <a href="#/chat" data-route="chat">🤖 AI Assistant</a>
+      <a href="#/guide" data-route="guide">🧭 Step-by-step Guide</a>
+      <a href="#/explain" data-route="explain">🧩 Program Explainer</a>
+      <a href="#/verify" data-route="verify">✅ Verify Output</a>
+      <a href="#/diagnose" data-route="diagnose">🩺 Error Diagnosis</a>
+      <a href="#/viva" data-route="viva">🎓 Viva Practice</a>
+      <a href="#/manual" data-route="manual">📄 Lab Manual</a>
+      <p class="sidebar-note">8086 · MASM/TASM/emu8086 syntax</p>
+    </nav>
+
+    <main id="view" class="view" tabindex="-1" aria-live="polite"></main>
+
+    <aside class="activity" id="activity">
+      <div class="activity-head">
+        <h3>Agent Activity</h3>
+        <button class="icon-btn small" id="activityClose" aria-label="Close">✕</button>
+      </div>
+      <div id="activityBody" class="activity-body">
+        <p class="muted">When you use the AI Assistant or a tool page, the selected tool, the reason and the result status appear here.</p>
+      </div>
+    </aside>
+  </div>
+  <div class="backdrop" id="backdrop"></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

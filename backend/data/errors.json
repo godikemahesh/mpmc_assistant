@@ -1,0 +1,70 @@
+{
+  "errors": [
+    {
+      "pattern": "operand types? (must )?match|operand size|type mismatch|size mismatch",
+      "title": "Operand size mismatch",
+      "causes": ["Mixing an 8-bit operand with a 16-bit operand, e.g. MOV AL, BX.", "Moving a word variable (DW) into an 8-bit register, or a byte variable (DB) into a 16-bit register."],
+      "fixes": ["Use registers of the same size (AL with BL, AX with BX).", "Match the variable type: DB with 8-bit registers, DW with 16-bit registers.", "Use BYTE PTR or WORD PTR when the size cannot be known, e.g. MOV BYTE PTR [SI], 05h."]
+    },
+    {
+      "pattern": "undefined symbol|symbol not defined|unknown identifier|undefined",
+      "title": "Undefined symbol",
+      "causes": ["A label or variable is misspelled or not declared.", "A hex number starts with a letter (FFh) so it is read as a symbol name."],
+      "fixes": ["Check the spelling of labels and variables.", "Add a leading 0 to hex numbers that start with A-F (write 0FFh)."]
+    },
+    {
+      "pattern": "immediate mode illegal|illegal immediate|improper operand type|invalid use of register",
+      "title": "Illegal immediate operand",
+      "causes": ["Moving an immediate value directly into a segment register (MOV DS, 1000h or MOV DS, @DATA).", "Using an immediate with MUL or DIV (MUL 05h)."],
+      "fixes": ["Load the value into AX first, then MOV DS, AX.", "Load the operand into a register first, then MUL/DIV that register."]
+    },
+    {
+      "pattern": "wrong parameters|invalid instruction operands|illegal (combination|use)|invalid operand",
+      "title": "Invalid operand combination",
+      "causes": ["Memory-to-memory operation such as MOV VAR1, VAR2.", "Unsupported operand for the instruction (e.g. OUT 0FFE6h, AL with a port above FFh).", "Segment register to segment register move (MOV ES, DS)."],
+      "fixes": ["Move through a register: MOV AL, VAR2 then MOV VAR1, AL.", "For ports above FFh load the address into DX and use OUT DX, AL.", "Copy segment registers through a general register: MOV AX, DS then MOV ES, AX."]
+    },
+    {
+      "pattern": "divide (error|overflow)|division (by zero|overflow)|int 0|interrupt 0",
+      "title": "Divide error / divide overflow",
+      "causes": ["The divisor is zero.", "The quotient is too large for AL (8-bit DIV) or AX (16-bit DIV).", "DX was not cleared before a 16-bit DIV, so DX:AX is a huge number."],
+      "fixes": ["Check that the divisor is not 0.", "Use a 16-bit divisor if the quotient does not fit in 8 bits.", "Add XOR DX, DX (or MOV DX, 0) before a 16-bit DIV."]
+    },
+    {
+      "pattern": "illegal instruction|unknown instruction|syntax error|unrecognized|not recognized",
+      "title": "Illegal instruction or syntax error",
+      "causes": ["Typing mistake in an instruction (MOVE instead of MOV).", "Using a 80386+ instruction or register (EAX, MOVZX) in an 8086 program.", "Missing comma between operands."],
+      "fixes": ["Check the spelling of the instruction on the reported line.", "Use only 8086 instructions and 16-bit registers.", "Write operands as DEST, SOURCE separated by a comma."]
+    },
+    {
+      "pattern": "missing (or unreachable )?cs|no stack|end of file|missing end|unexpected end|open procedure|unclosed",
+      "title": "Missing END / segment / procedure closure",
+      "causes": ["The program does not finish with END MAIN.", "A PROC has no matching ENDP.", "The .STACK directive or segment ASSUME is missing (warning in LINK)."],
+      "fixes": ["End the program with MAIN ENDP and END MAIN.", "Add .STACK 100h after .MODEL SMALL."]
+    },
+    {
+      "pattern": "jump (out of range|destination too far)|relative jump out of range|short jump",
+      "title": "Jump out of range",
+      "causes": ["Conditional jumps on the 8086 can only reach -128 to +127 bytes."],
+      "fixes": ["Reverse the condition and jump over a JMP: replace JE FAR_LABEL with JNE SKIP / JMP FAR_LABEL / SKIP:."]
+    },
+    {
+      "pattern": "infinite loop|hangs|never ends|not stopping|keeps running",
+      "title": "Program does not terminate / infinite loop",
+      "causes": ["CX is 0 when LOOP starts (LOOP then runs 65536 times) or CX is changed inside the loop.", "No exit instruction (MOV AH,4Ch / INT 21h or HLT).", "The loop label is placed before the counter initialisation."],
+      "fixes": ["Load CX with the count before the loop and do not modify CX inside it (or PUSH/POP it).", "End the program with MOV AH, 4Ch and INT 21h (DOS) or HLT (kit).", "Place the label after the initialisation instructions."]
+    },
+    {
+      "pattern": "wrong (output|result|answer|value)|incorrect (output|result)|garbage|unexpected (output|result)",
+      "title": "Wrong or unexpected output",
+      "causes": ["DS not initialised, so variables are read from the wrong segment.", "Bytes read in reverse order (little-endian).", "Signed jumps used for unsigned data, or vice versa.", "Values entered in decimal instead of hex (missing 'h')."],
+      "fixes": ["Add MOV AX, @DATA / MOV DS, AX at the start.", "Remember that memory stores the low byte first: 68ACh appears as AC 68.", "Use JA/JB/JAE/JBE for unsigned data and JG/JL/JGE/JLE for signed data.", "Add the 'h' suffix to every hex number."]
+    },
+    {
+      "pattern": "dosbox|not recognized as an internal|command not found|masm.exe|tasm.exe|cannot find",
+      "title": "Assembler or tool not found",
+      "causes": ["MASM/TASM folder not mounted in DOSBox.", "Running MASM in a modern Windows terminal, which cannot run 16-bit programs."],
+      "fixes": ["In DOSBox: MOUNT C C:\\8086 then C: and run MASM from that folder.", "Use DOSBox or emu8086 — 64-bit Windows cannot run 16-bit DOS programs directly."]
+    }
+  ]
+}
