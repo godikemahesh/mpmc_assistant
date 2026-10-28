@@ -15,3 +15,5 @@ uploads/
 Thumbs.db
 .vscode/
 .vercel/
+# frontend build output
+dist/

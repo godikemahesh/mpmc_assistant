@@ -20,7 +20,7 @@ log = logging.getLogger("app")
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = config.MAX_UPLOAD_MB * 1024 * 1024
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": "*" if "*" in config.ALLOWED_ORIGINS else config.ALLOWED_ORIGINS}})
 
 
 class BadRequest(Exception):

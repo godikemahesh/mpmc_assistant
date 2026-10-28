@@ -13,7 +13,10 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile").strip()
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_TIMEOUT = int(os.getenv("GROQ_TIMEOUT", "15"))
 
-DATA_DIR = os.path.join(BASE_DIR, "data")
+# Which websites may call the API, comma separated (e.g. https://my-app.vercel.app). "*" = any.
+ALLOWED_ORIGINS = [o.strip().rstrip("/") for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()] or ["*"]
+
+DATA_DIR =os.path.join(BASE_DIR, "data")
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend"))
 
 MAX_TOOL_CALLS = 3                   # hard cap per agent request (prevents loops)

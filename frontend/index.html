@@ -3,45 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MPMC Lab Assistant</title>
-  <meta name="description" content="Agentic AI-based assistant for 8086 Microprocessors & Microcontrollers lab experiments">
+  <title>MPMC Lab Copilot</title>
+  <meta name="description" content="Agentic AI assistant for 8086 Microprocessors & Microcontrollers lab experiments">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button>
-    <a href="#/" class="brand"><span class="logo">⚡</span><span>MPMC Lab Assistant</span></a>
-    <span class="badge" id="modeBadge" title="AI mode">checking…</span>
-    <button class="icon-btn" id="activityBtn" aria-label="Show agent activity">🧠</button>
-  </header>
+  <!-- Icon set (Lucide-style line icons) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+      <symbol id="i-library" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+      <symbol id="i-steps" viewBox="0 0 24 24"><path d="M3 6l2 2 3-3"/><path d="M3 13l2 2 3-3"/><path d="M3 20l2 2 3-3" opacity=".5"/><path d="M12 6h9M12 13h9M12 20h6"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/><path d="M14 4l-4 16"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="M22 4L12 14l-3-3"/></symbol>
+      <symbol id="i-bug" viewBox="0 0 24 24"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l-3 2M5 7l3 2M19 19l-3-2M5 19l3-2M20 13h-4M4 13h4M10 4l1 2M14 4l-1 2"/></symbol>
+      <symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/><path d="M22 10v6"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+      <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M19 9h3M19 15h3M2 9h3M2 15h3"/></symbol>
+      <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+      <symbol id="i-ok" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+      <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></symbol>
+    </defs>
+  </svg>
 
-  <div class="layout">
-    <nav class="sidebar" id="sidebar">
-      <a href="#/" data-route="home">🏠 Home</a>
-      <a href="#/library" data-route="library">📚 Experiment Library</a>
-      <a href="#/chat" data-route="chat">🤖 AI Assistant</a>
-      <a href="#/guide" data-route="guide">🧭 Step-by-step Guide</a>
-      <a href="#/explain" data-route="explain">🧩 Program Explainer</a>
-      <a href="#/verify" data-route="verify">✅ Verify Output</a>
-      <a href="#/diagnose" data-route="diagnose">🩺 Error Diagnosis</a>
-      <a href="#/viva" data-route="viva">🎓 Viva Practice</a>
-      <a href="#/manual" data-route="manual">📄 Lab Manual</a>
-      <p class="sidebar-note">8086 · MASM/TASM/emu8086 syntax</p>
-    </nav>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <a href="#/" class="brand">
+        <span class="brand-mark"><svg class="i"><use href="#i-cpu"/></svg></span>
+        <span class="brand-text"><strong>MPMC Lab Copilot</strong><small>8086 · Agentic AI</small></span>
+      </a>
 
-    <main id="view" class="view" tabindex="-1" aria-live="polite"></main>
+      <nav class="nav">
+        <p class="nav-label">Workspace</p>
+        <a href="#/" data-route="home"><svg class="i"><use href="#i-dashboard"/></svg>Dashboard</a>
+        <a href="#/library" data-route="library"><svg class="i"><use href="#i-library"/></svg>Experiment Library</a>
+        <a href="#/chat" data-route="chat"><svg class="i"><use href="#i-spark"/></svg>AI Lab Copilot<span class="nav-pill">AI</span></a>
 
-    <aside class="activity" id="activity">
-      <div class="activity-head">
-        <h3>Agent Activity</h3>
-        <button class="icon-btn small" id="activityClose" aria-label="Close">✕</button>
-      </div>
-      <div id="activityBody" class="activity-body">
-        <p class="muted">When you use the AI Assistant or a tool page, the selected tool, the reason and the result status appear here.</p>
+        <p class="nav-label">Lab Tools</p>
+        <a href="#/guide" data-route="guide"><svg class="i"><use href="#i-steps"/></svg>Procedure Walkthrough</a>
+        <a href="#/explain" data-route="explain"><svg class="i"><use href="#i-code"/></svg>Code Analyzer</a>
+        <a href="#/verify" data-route="verify"><svg class="i"><use href="#i-check"/></svg>Result Validator</a>
+        <a href="#/diagnose" data-route="diagnose"><svg class="i"><use href="#i-bug"/></svg>Debug Assistant</a>
+        <a href="#/viva" data-route="viva"><svg class="i"><use href="#i-cap"/></svg>Viva Prep</a>
+
+        <p class="nav-label">Resources</p>
+        <a href="#/manual" data-route="manual"><svg class="i"><use href="#i-file"/></svg>Manual Search</a>
+      </nav>
+
+      <div class="engine" id="engineCard">
+        <div class="engine-row"><span class="dot" id="engineDot"></span><span id="engineName">Connecting…</span></div>
+        <small id="engineInfo">Checking AI engine</small>
       </div>
     </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn" id="menuBtn" aria-label="Open menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="crumb"><span class="crumb-root">Lab Copilot</span><span class="crumb-sep">/</span><span id="crumb">Dashboard</span></div>
+        <span class="badge" id="modeBadge" title="AI mode">checking…</span>
+        <button class="icon-btn" id="activityBtn" aria-label="Show agent activity"><svg class="i"><use href="#i-pulse"/></svg></button>
+      </header>
+
+      <div class="content">
+        <main id="view" class="view" tabindex="-1" aria-live="polite"></main>
+
+        <aside class="activity" id="activity" aria-label="Agent activity">
+          <div class="activity-head">
+            <div><p class="eyebrow">Live trace</p><h3>Agent Activity</h3></div>
+            <button class="icon-btn small" id="activityClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+          </div>
+          <div id="activityBody" class="activity-body">
+            <div class="activity-empty">
+              <svg class="i"><use href="#i-pulse"/></svg>
+              <p>Every request is traced here: which tool the agent selected, why, and what it returned.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
   </div>
   <div class="backdrop" id="backdrop"></div>
   <div class="toast" id="toast" role="status"></div>

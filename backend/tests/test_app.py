@@ -197,7 +197,7 @@ def test_guide_steps():
 # ---------------------------------------------------------------- API
 
 def test_homepage_and_health(client):
-    assert b"MPMC Lab Assistant" in client.get("/").data
+    assert b"MPMC Lab Copilot" in client.get("/").data
     h = client.get("/api/health").get_json()
     assert h["status"] == "ok" and h["mode"] == "fallback"
 

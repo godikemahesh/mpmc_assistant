@@ -200,6 +200,19 @@ The `render.yaml` file already contains these settings: root folder `backend`, b
 
 ---
 
+## ▲ Stage 6d: Frontend on Vercel + backend on Render (separate)
+
+1. Deploy the backend on Render (Stage 6b) and copy its URL, e.g. `https://agentic-ai-mpmc-lab-assistant.onrender.com`.
+2. On Vercel: **Add New → Project** → import the repo → set **Root Directory** to `frontend`. Framework Preset: **Other**. `frontend/vercel.json` runs `node build.js` and publishes `dist/`.
+3. **Environment Variables** → add `BACKEND_URL` = your Render URL (no trailing `/`, no `/api`) → **Deploy**.
+4. Back on Render → **Environment** → set `ALLOWED_ORIGINS` = your Vercel URL (e.g. `https://my-app.vercel.app`) → save. Render redeploys automatically.
+5. Open the Vercel site. The badge at the top right should show **Groq AI** or **Rule-based**, not **Offline**.
+
+If you change `BACKEND_URL` later, **redeploy** on Vercel, because the URL is written in at build time.
+To test the build locally: `cd frontend`, `Copy-Item .env.example .env`, edit it, then run `node build.js` and check `dist/js/config.js`.
+
+---
+
 ## 🛠️ Troubleshooting
 
 | Problem | Fix |
